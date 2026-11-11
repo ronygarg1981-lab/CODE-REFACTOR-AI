@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeRefactor AI</title>
+  <style>
+    body { font-family: monospace; background: #121212; color: #10b981; padding: 25px; max-width: 800px; margin: 0 auto; }
+    .card { background: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #333; }
+    textarea, input { width: 100%; background: #121212; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 5px; box-sizing: border-box; margin-bottom: 10px; font-family: monospace; }
+    button { width: 100%; background: #10b981; color: #000; padding: 10px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+    pre { background: #121212; color: #e5e7eb; padding: 15px; border-radius: 5px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>💻 CodeRefactor & Audit AI</h2>
+  <div class="card">
+    <input type="password" id="key" placeholder="Enter Gemini API Key">
+    <textarea id="code" rows="6" placeholder="// Paste dirty code here..."></textarea>
+    <button onclick="auditCode()">Refactor & Audit Code</button>
+    <pre id="output">// Results will appear here...</pre>
+  </div>
+
+  <script>
+    async function auditCode() {
+      const key = document.getElementById('key').value.trim();
+      const code = document.getElementById('code').value.trim();
+      const output = document.getElementById('output');
+      
+      if(!key || !code) return alert("Inputs missing!");
+      output.innerText = "Reviewing code syntax and security vulnerabilities...";
+
+      const prompt = `Review this code. 1. Clean and refactor it for performance. 2. Highlight security bugs or issues. 3. Return fixed production-grade code.\n\nCode:\n${code}`;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        output.innerText = data.candidates[0].content.parts[0].text;
+      } catch(e) { output.innerText = "Failed to fetch response."; }
+    }
+  </script>
+</body>
+</html>
